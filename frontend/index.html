@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Surya-Sanchay | Smart Solar Management</title>
+  <meta name="description" content="Surya-Sanchay – Smart Solar Energy Management System for rural India"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-logo">
+        <svg width="26" height="26" viewBox="0 0 36 36" fill="none">
+          <circle cx="18" cy="18" r="9" fill="rgba(255,255,255,0.95)"/>
+          <path d="M18 3v4M18 29v4M3 18h4M29 18h4M6.5 6.5l2.8 2.8M26.7 26.7l2.8 2.8M6.5 29.5l2.8-2.8M26.7 9.3l2.8-2.8" stroke="rgba(255,255,255,0.85)" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-en" data-i18n="brand.en">Surya-Sanchay</span>
+        <span class="brand-hi" data-i18n="brand.hi">सूर्य-संचय</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="lang-dropdown-wrap" id="langDropdownWrap">
+        <button class="header-btn lang-toggle" id="langToggle" aria-haspopup="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+          <span id="langLabel">EN</span>
+          <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="lang-dropdown" id="langDropdown" role="menu">
+          <button class="lang-option active" data-lang="en">🇬🇧 English</button>
+          <button class="lang-option" data-lang="hi">🇮🇳 हिंदी</button>
+          <button class="lang-option" data-lang="mr">🌺 मराठी</button>
+        </div>
+      </div>
+      <button class="header-btn notif-btn" id="notifBtn" aria-label="Notifications">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span class="notif-badge">4</span>
+      </button>
+      <button class="header-btn dark-toggle" id="darkToggle" aria-label="Toggle Dark Mode">
+        <svg class="sun-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="moon-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ NAV ═══ -->
+<nav class="main-nav" role="navigation">
+  <div class="nav-inner">
+    <button class="nav-tab active" id="tab-dashboard" data-tab="dashboard">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span data-i18n="nav.dashboard">Dashboard</span>
+    </button>
+    <button class="nav-tab" id="tab-solar" data-tab="solar">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      <span data-i18n="nav.solar">Solar</span>
+    </button>
+    <button class="nav-tab" id="tab-pumping" data-tab="pumping">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>
+      <span data-i18n="nav.pumping">Pumping</span>
+    </button>
+    <button class="nav-tab" id="tab-grid" data-tab="grid">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span data-i18n="nav.grid">Grid</span>
+    </button>
+    <button class="nav-tab" id="tab-reports" data-tab="reports">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span data-i18n="nav.reports">Reports</span>
+    </button>
+    <button class="nav-tab" id="tab-about" data-tab="about">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      <span data-i18n="nav.about">About</span>
+    </button>
+  </div>
+</nav>
+
+<main class="main-content">
+
+  <!-- ══════════════════════════════════════
+       DASHBOARD TAB
+  ══════════════════════════════════════ -->
+  <div class="tab-content active" id="content-dashboard">
+
+    <!-- Status Banner -->
+    <section class="status-banner solar-safe" id="statusBanner">
+      <div class="banner-left">
+        <div class="status-indicator-outer">
+          <div class="status-pulse"></div>
+          <div class="status-dot green"></div>
+        </div>
+        <div class="banner-text">
+          <h2 class="banner-title" data-i18n="banner.title">Solar Safe</h2>
+          <p class="banner-subtitle" data-i18n="banner.subtitle">All systems operating normally • Grid stable • Solar active</p>
+        </div>
+      </div>
+      <div class="banner-right">
+        <div class="live-badge">
+          <span class="live-dot"></span>
+          <span data-i18n="banner.updated">Live • Updated 2 min ago</span>
+        </div>
+        <div class="status-legend">
+          <div class="legend-item"><span class="legend-dot green"></span><span data-i18n="banner.legend.safe">Solar Safe</span></div>
+          <div class="legend-item"><span class="legend-dot yellow"></span><span data-i18n="banner.legend.warn">Use Battery Carefully</span></div>
+          <div class="legend-item"><span class="legend-dot red"></span><span data-i18n="banner.legend.stop">Stop Heavy Appliances</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Metrics -->
+    <section class="metrics-grid">
+      <div class="metric-card outages">
+        <div class="metric-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <div class="metric-info">
+          <span class="metric-label" data-i18n="metric.outages.label">Outages This Month</span>
+          <span class="metric-value red">3</span>
+          <span class="metric-sub" data-i18n="metric.outages.sub">Last: 2 days ago</span>
+          <span class="metric-trend down">↓ -1 vs last month</span>
+        </div>
+      </div>
+      <div class="metric-card solar-hours">
+        <div class="metric-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>
+        <div class="metric-info">
+          <span class="metric-label" data-i18n="metric.solar.label">Solar Hours Today</span>
+          <span class="metric-value yellow">6.5 hrs</span>
+          <span class="metric-sub" data-i18n="metric.solar.sub">Peak: 11 AM–2 PM</span>
+          <span class="metric-trend up">↑ +0.5 vs yesterday</span>
+        </div>
+      </div>
+      <div class="metric-card water-pumped">
+        <div class="metric-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg></div>
+        <div class="metric-info">
+          <span class="metric-label" data-i18n="metric.water.label">Water Pumped Today</span>
+          <span class="metric-value teal">4,500 L</span>
+          <span class="metric-sub" data-i18n="metric.water.sub">85% of daily target</span>
+          <span class="metric-trend up">↑ On track</span>
+        </div>
+      </div>
+      <div class="metric-card energy-saved">
+        <div class="metric-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+        <div class="metric-info">
+          <span class="metric-label" data-i18n="metric.energy.label">Energy Saved</span>
+          <span class="metric-value green">₹2,340</span>
+          <span class="metric-sub" data-i18n="metric.energy.sub">This month so far</span>
+          <span class="metric-trend up">↑ +₹320 vs last week</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Middle: Village Info + Solar Forecast -->
+    <div class="section-grid-2">
+      <!-- Village Card -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span data-i18n="village.title">Village Information</span>
+          </h3>
+        </div>
+        <div class="village-info">
+          <div class="info-row"><span class="info-label" data-i18n="village.village">Village</span><span class="info-value">Rampur</span></div>
+          <div class="info-row"><span class="info-label" data-i18n="village.district">District</span><span class="info-value">Chitrakoot, UP</span></div>
+          <div class="info-row"><span class="info-label" data-i18n="village.households">Households</span><span class="info-value">248</span></div>
+          <div class="info-row"><span class="info-label" data-i18n="village.capacity">Solar Capacity</span><span class="info-value">25 kWp</span></div>
+          <div class="info-row"><span class="info-label" data-i18n="village.status">System Status</span><span class="info-value status-ok" data-i18n="village.status.val">Operational ✓</span></div>
+          <div class="info-row"><span class="info-label" data-i18n="village.maintenance">Last Maintenance</span><span class="info-value">March 15, 2026</span></div>
+        </div>
+      </div>
+
+      <!-- Solar Forecast Card -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 11.95-13.94"/><path d="M17.5 19a7 7 0 000-14 7 7 0 010 14z"/></svg>
+            <span data-i18n="forecast.title">Today's Solar Forecast</span>
+          </h3>
+          <span class="forecast-header-badge sunny" data-i18n="forecast.badge">☀ Sunny</span>
+        </div>
+        <div class="forecast-body">
+          <div class="forecast-item"><span class="forecast-key" data-i18n="forecast.peak">Peak Generation</span><span class="forecast-val">11:00 AM – 2:00 PM</span></div>
+          <div class="forecast-item"><span class="forecast-key" data-i18n="forecast.output">Estimated Output</span><span class="forecast-val highlight">8.2 kWh</span></div>
+          <div class="forecast-item"><span class="forecast-key" data-i18n="forecast.uv">UV Index</span><span class="forecast-val">High (8.4)</span></div>
+          <div class="forecast-item"><span class="forecast-key" data-i18n="forecast.cloud">Cloud Cover</span><span class="forecast-val">12%</span></div>
+          <div class="confidence-bar">
+            <span class="confidence-label" data-i18n="forecast.confidence">Confidence</span>
+            <div class="bar-track"><div class="bar-fill" style="width:92%"></div></div>
+            <span class="bar-pct">92%</span>
+          </div>
+        </div>
+        <div class="solar-chart">
+          <div class="solar-timeline">
+            <div class="chart-bar" style="height:18%"></div>
+            <div class="chart-bar" style="height:36%"></div>
+            <div class="chart-bar" style="height:60%"></div>
+            <div class="chart-bar active" style="height:82%"></div>
+            <div class="chart-bar peak" style="height:100%"></div>
+            <div class="chart-bar peak" style="height:100%"></div>
+            <div class="chart-bar peak" style="height:96%"></div>
+            <div class="chart-bar decline" style="height:78%"></div>
+            <div class="chart-bar decline" style="height:55%"></div>
+            <div class="chart-bar" style="height:36%"></div>
+            <div class="chart-bar" style="height:20%"></div>
+            <div class="chart-bar" style="height:8%"></div>
+          </div>
+          <div class="chart-labels"><span>6AM</span><span></span><span></span><span>9AM</span><span></span><span>12PM</span><span></span><span>3PM</span><span></span><span></span><span></span><span>6PM</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lower: Golden Hour + Tank -->
+    <div class="section-grid-half">
+      <!-- Golden Hour -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span data-i18n="golden.title">Next Golden Hour</span>
+          </h3>
+        </div>
+        <div class="golden-content">
+          <div class="countdown-display">
+            <span class="countdown-time" id="countdownTimer">02:45:00</span>
+            <span class="countdown-label" data-i18n="golden.hours">Hours Remaining</span>
+          </div>
+          <div class="golden-info">
+            <div class="g-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg><span data-i18n="golden.starts">Starts:</span> <strong>11:00 AM</strong></div>
+            <div class="g-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span data-i18n="golden.duration">Duration:</span> <strong>3 Hours</strong></div>
+            <div class="g-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span data-i18n="golden.output">Output:</span> <strong>~8.2 kWh</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Water Tank -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+            <span data-i18n="tank.title">Water Tank Fill Status</span>
+          </h3>
+        </div>
+        <div class="tank-content">
+          <div class="donut-chart-container">
+            <svg viewBox="0 0 100 100" width="140" height="140">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="var(--border-solid)" stroke-width="12"/>
+              <circle cx="50" cy="50" r="40" fill="none" stroke="url(#tealGrad)" stroke-width="12"
+                stroke-dasharray="170.8 251.2" stroke-dashoffset="62.5"
+                stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <defs>
+                <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#00BFA5"/>
+                  <stop offset="100%" stop-color="#00897B"/>
+                </linearGradient>
+              </defs>
+              <text x="50" y="46" text-anchor="middle" fill="#00BFA5" font-size="16" font-weight="900" font-family="Inter,sans-serif">68%</text>
+              <text x="50" y="58" text-anchor="middle" fill="#8E97C0" font-size="6.5" font-family="Inter,sans-serif" data-i18n="tank.filled">FILLED</text>
+            </svg>
+          </div>
+          <div class="tank-stats">
+            <div class="tank-stat-row"><span class="tank-label" data-i18n="tank.current">Current Volume</span><span class="tank-value">6,800 L</span></div>
+            <div class="tank-stat-row"><span class="tank-label" data-i18n="tank.total">Total Capacity</span><span class="tank-value">10,000 L</span></div>
+            <div class="tank-stat-row"><span class="tank-label" data-i18n="tank.rate">Fill Rate</span><span class="tank-value teal">450 L/hr</span></div>
+            <div class="tank-stat-row"><span class="tank-label" data-i18n="tank.target">Target by Evening</span><span class="tank-value">85% (8,500 L)</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Bar -->
+    <section class="action-bar">
+      <button class="action-btn primary" id="startPumpBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>
+        <span data-i18n="action.pump">Start Pump</span>
+      </button>
+      <button class="action-btn secondary" id="scheduleBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span data-i18n="action.schedule">Today's Schedule</span>
+      </button>
+      <button class="action-btn secondary" id="reportBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span data-i18n="action.report">Download Report</span>
+      </button>
+    </section>
+
+    <!-- Recent Notifications -->
+    <section class="notifications-section">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+            <span data-i18n="notif.title">Recent Notifications</span>
+          </h3>
+          <button class="clear-btn" data-i18n="notif.clear">Clear All</button>
+        </div>
+        <div class="notif-list" id="notifList">
+          <div class="notif-item"><span class="notif-dot green"></span><div class="notif-body"><p class="notif-msg" data-i18n="notif.1">Solar generation at peak — 8.2 kW output</p><span class="notif-time" data-i18n="notif.time.1">2 minutes ago</span></div></div>
+          <div class="notif-item"><span class="notif-dot yellow"></span><div class="notif-body"><p class="notif-msg" data-i18n="notif.2">Battery level at 72% — moderate usage recommended</p><span class="notif-time" data-i18n="notif.time.2">15 minutes ago</span></div></div>
+          <div class="notif-item"><span class="notif-dot teal"></span><div class="notif-body"><p class="notif-msg" data-i18n="notif.3">Water tank refilled: 4,500 L pumped today</p><span class="notif-time" data-i18n="notif.time.3">1 hour ago</span></div></div>
+          <div class="notif-item"><span class="notif-dot red"></span><div class="notif-body"><p class="notif-msg" data-i18n="notif.4">Grid outage detected — switchover to solar successful</p><span class="notif-time" data-i18n="notif.time.4">2 hours ago</span></div></div>
+          <div class="notif-item"><span class="notif-dot green"></span><div class="notif-body"><p class="notif-msg" data-i18n="notif.5">System maintenance check passed — all sensors OK</p><span class="notif-time" data-i18n="notif.time.5">Yesterday, 6:30 PM</span></div></div>
+        </div>
+      </div>
+    </section>
+  </div><!-- /dashboard -->
+
+  <!-- ══════════════════════════════════════
+       SOLAR TAB
+  ══════════════════════════════════════ -->
+  <div class="tab-content" id="content-solar">
+    <section class="page-hero solar-hero">
+      <h2 data-i18n="solar.hero.title">Solar Energy Monitor</h2>
+      <p data-i18n="solar.hero.sub">Real-time solar panel performance and generation data</p>
+    </section>
+    <section class="metrics-grid">
+      <div class="metric-card solar-hours">
+        <div class="metric-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>
+        <div class="metric-info"><span class="metric-label" data-i18n="solar.current.label">Current Output</span><span class="metric-value yellow">7.8 kW</span><span class="metric-sub" data-i18n="solar.current.sub">Live generation</span></div>
+      </div>
+      <div class="metric-card energy-saved">
+        <div class="metric-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <div class="metric-info"><span class="metric-label" data-i18n="solar.efficiency.label">Panel Efficiency</span><span class="metric-value green">94.2%</span><span class="metric-sub" data-i18n="solar.efficiency.sub">Above average</span></div>
+      </div>
+      <div class="metric-card water-pumped">
+        <div class="metric-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="22" height="13" rx="2"/><path d="M23 13H1M8 19v2M16 19v2"/></svg></div>
+        <div class="metric-info"><span class="metric-label" data-i18n="solar.battery.label">Battery Charge</span><span class="metric-value teal">72%</span><span class="metric-sub" data-i18n="solar.battery.sub">18 kWh stored</span></div>
+      </div>
+      <div class="metric-card solar-hours">
+        <div class="metric-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="metric-info"><span class="metric-label" data-i18n="solar.total.label">Today's Total</span><span class="metric-value yellow">42.6 kWh</span><span class="metric-sub" data-i18n="solar.total.sub">Updated now</span></div>
+      </div>
+    </section>
+    <div class="card mb-card">
+      <div class="card-header">
+        <h3 class="card-title" data-i18n="solar.chart.title">📊 Generation Trend (Last 7 Days)</h3>
+      </div>
+      <div class="chart-large">
+        <div class="bar-group">
+          <div class="v-bar" style="height:70%" data-val="38.5 kWh"><span class="v-label">Mon</span></div>
+          <div class="v-bar" style="height:55%" data-val="30.1 kWh"><span class="v-label">Tue</span></div>
+          <div class="v-bar" style="height:80%" data-val="43.8 kWh"><span class="v-label">Wed</span></div>
+          <div class="v-bar active" style="height:95%" data-val="52.1 kWh"><span class="v-label">Thu</span></div>
+          <div class="v-bar" style="height:85%" data-val="46.6 kWh"><span class="v-label">Fri</span></div>
+          <div class="v-bar" style="height:60%" data-val="32.9 kWh"><span class="v-label">Sat</span></div>
+          <div class="v-bar" style="height:75%" data-val="41.1 kWh"><span class="v-label">Sun</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       PUMPING TAB
+  ══════════════════════════════════════ -->
+  <div class="tab-content" id="content-pumping">
+    <section class="page-hero pump-hero">
+      <h2 data-i18n="pump.hero.title">Water Pumping System</h2>
+      <p data-i18n="pump.hero.sub">Manage solar-powered water distribution for your village</p>
+    </section>
+    <div class="section-grid-half">
+      <div class="card">
+        <div class="card-header"><h3 class="card-title" data-i18n="pump.tank.title">💧 Tank Status</h3></div>
+        <div class="tank-content">
+          <div class="donut-chart-container">
+            <svg viewBox="0 0 100 100" width="140" height="140">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="var(--border-solid)" stroke-width="12"/>
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#00BFA5" stroke-width="12"
+                stroke-dasharray="170.8 251.2" stroke-dashoffset="62.5"
+                stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <text x="50" y="46" text-anchor="middle" fill="#00BFA5" font-size="16" font-weight="900" font-family="Inter,sans-serif">68%</text>
+              <text x="50" y="58" text-anchor="middle" fill="#8E97C0" font-size="6.5" font-family="Inter,sans-serif" data-i18n="tank.filled">FILLED</text>
+            </svg>
+          </div>
+          <div class="tank-stats">
+            <div class="tank-stat-row"><span class="tank-label" data-i18n="pump.volume">Volume</span><span class="tank-value">6,800 / 10,000 L</span></div>
+            <div class="tank-stat-row"><span class="tank-label" data-i18n="tank.rate">Fill Rate</span><span class="tank-value teal">450 L/hr</span></div>
+            <div class="tank-stat-row"><span class="tank-label" data-i18n="pump.eta">ETA Full</span><span class="tank-value">~3.5 hrs</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3 class="card-title" data-i18n="pump.controls.title">⚙ Pump Controls</h3></div>
+        <div class="pump-controls">
+          <div class="pump-stat"><span data-i18n="pump.status">Status</span><span class="badge-active" data-i18n="pump.active">Active</span></div>
+          <div class="pump-stat"><span data-i18n="pump.flow">Flow Rate</span><span>450 L/hr</span></div>
+          <div class="pump-stat"><span data-i18n="pump.power">Power Draw</span><span>2.1 kW</span></div>
+          <div class="pump-stat"><span data-i18n="pump.runtime">Run Time Today</span><span>10 hrs</span></div>
+          <div class="pump-actions-row">
+            <button class="action-btn primary" style="flex:1"><span data-i18n="pump.start">▶ Start Pump</span></button>
+            <button class="action-btn danger" style="flex:1"><span data-i18n="pump.stop">■ Stop Pump</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       GRID TAB
+  ══════════════════════════════════════ -->
+  <div class="tab-content" id="content-grid">
+    <section class="page-hero grid-hero">
+      <h2 data-i18n="grid.hero.title">Grid Monitor</h2>
+      <p data-i18n="grid.hero.sub">Track grid connectivity, voltage, and outage history</p>
+    </section>
+    <section class="metrics-grid">
+      <div class="metric-card energy-saved">
+        <div class="metric-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="metric-info"><span class="metric-label" data-i18n="grid.status.label">Grid Status</span><span class="metric-value green" data-i18n="grid.status.val">Connected</span><span class="metric-sub" data-i18n="grid.status.sub">Stable — 230V</span></div>
+      </div>
+      <div class="metric-card outages">
+        <div class="metric-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <div class="metric-info"><span class="metric-label" data-i18n="grid.outages.label">Outages This Month</span><span class="metric-value red">3</span><span class="metric-sub" data-i18n="grid.outages.sub">Total: 4.2 hrs lost</span></div>
+      </div>
+      <div class="metric-card energy-saved">
+        <div class="metric-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="22" height="13" rx="2"/></svg></div>
+        <div class="metric-info"><span class="metric-label" data-i18n="grid.uptime.label">Grid Uptime</span><span class="metric-value green">94.8%</span><span class="metric-sub" data-i18n="grid.uptime.sub">Last 30 days</span></div>
+      </div>
+      <div class="metric-card solar-hours">
+        <div class="metric-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="metric-info"><span class="metric-label" data-i18n="grid.last.label">Last Outage</span><span class="metric-value yellow" data-i18n="grid.last.val">2 days ago</span><span class="metric-sub" data-i18n="grid.last.sub">Duration: 1.5 hrs</span></div>
+      </div>
+    </section>
+    <div class="card mb-card">
+      <div class="card-header"><h3 class="card-title">⚡ Voltage Monitor</h3></div>
+      <div class="voltage-bar-wrap">
+        <div class="voltage-label">Phase A — 232V (Nominal: 230V ±5%)</div>
+        <div class="voltage-track"><div class="voltage-fill" style="width:93%"></div></div>
+        <div class="voltage-labels"><span>200V</span><span>215V</span><span>230V</span><span>245V</span><span>260V</span></div>
+      </div>
+      <div class="voltage-bar-wrap" style="padding-top:0">
+        <div class="voltage-label">Phase B — 229V</div>
+        <div class="voltage-track"><div class="voltage-fill" style="width:91%"></div></div>
+      </div>
+    </div>
+    <div class="card mb-card">
+      <div class="card-header"><h3 class="card-title">📋 Recent Outage History</h3></div>
+      <div class="grid-history-item"><div><strong>Mar 20, 2026</strong> — 11:30 AM–1:00 PM</div><div><span style="color:var(--text-muted);font-size:0.82rem">1.5 hrs</span> <span class="outage-badge resolved">Resolved</span></div></div>
+      <div class="grid-history-item"><div><strong>Mar 14, 2026</strong> — 3:00 PM–4:12 PM</div><div><span style="color:var(--text-muted);font-size:0.82rem">1.2 hrs</span> <span class="outage-badge resolved">Resolved</span></div></div>
+      <div class="grid-history-item"><div><strong>Mar 8, 2026</strong> — 6:45 AM–8:15 AM</div><div><span style="color:var(--text-muted);font-size:0.82rem">1.5 hrs</span> <span class="outage-badge resolved">Resolved</span></div></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       REPORTS TAB
+  ══════════════════════════════════════ -->
+  <div class="tab-content" id="content-reports">
+    <section class="page-hero reports-hero">
+      <h2 data-i18n="reports.hero.title">Reports &amp; Analytics</h2>
+      <p data-i18n="reports.hero.sub">Download and review historical energy and water data</p>
+    </section>
+    <div class="card mb-card">
+      <div class="card-header">
+        <h3 class="card-title" data-i18n="reports.section">📄 Available Reports</h3>
+        <button class="action-btn secondary" id="generateReportBtn" style="padding:0.5rem 1.1rem;font-size:0.82rem;flex:0" data-i18n="reports.new">+ Generate New</button>
+      </div>
+      <div class="reports-list">
+        <div class="report-item">
+          <div style="display:flex;align-items:center;gap:12px;flex:1">
+            <div class="report-icon" style="background:var(--yellow-light)">☀️</div>
+            <div class="report-info">
+              <span class="report-title" data-i18n="reports.r1.title">Monthly Energy Summary — March 2026</span>
+              <span class="report-sub" data-i18n="reports.r1.sub">Solar generation, battery usage, grid events</span>
+            </div>
+          </div>
+          <button class="action-btn secondary report-dl-btn" data-report="energy" style="padding:0.45rem 1rem;font-size:0.8rem;flex:0;white-space:nowrap" data-i18n="reports.download">⬇ Download PDF</button>
+        </div>
+        <div class="report-item">
+          <div style="display:flex;align-items:center;gap:12px;flex:1">
+            <div class="report-icon" style="background:var(--teal-light)">💧</div>
+            <div class="report-info">
+              <span class="report-title" data-i18n="reports.r2.title">Water Pumping Log — March 2026</span>
+              <span class="report-sub" data-i18n="reports.r2.sub">Daily pump hours, volume pumped, efficiency</span>
+            </div>
+          </div>
+          <button class="action-btn secondary report-dl-btn" data-report="water" style="padding:0.45rem 1rem;font-size:0.8rem;flex:0;white-space:nowrap" data-i18n="reports.download">⬇ Download PDF</button>
+        </div>
+        <div class="report-item">
+          <div style="display:flex;align-items:center;gap:12px;flex:1">
+            <div class="report-icon" style="background:var(--blue-light)">⚡</div>
+            <div class="report-info">
+              <span class="report-title" data-i18n="reports.r3.title">Grid Outage Report — Q1 2026</span>
+              <span class="report-sub" data-i18n="reports.r3.sub">Outage events, duration, switchover success rate</span>
+            </div>
+          </div>
+          <button class="action-btn secondary report-dl-btn" data-report="grid" style="padding:0.45rem 1rem;font-size:0.8rem;flex:0;white-space:nowrap" data-i18n="reports.download">⬇ Download PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       ABOUT TAB
+  ══════════════════════════════════════ -->
+  <div class="tab-content" id="content-about">
+    <section class="page-hero about-hero">
+      <h2 data-i18n="about.hero.title">About Surya-Sanchay</h2>
+      <p data-i18n="about.hero.sub">Empowering rural India through clean solar energy</p>
+    </section>
+    <div class="card mb-card">
+      <p class="about-intro" data-i18n="about.desc">Surya-Sanchay (सूर्य-संचय) is a smart solar energy management platform developed under the Digital India initiative, aimed at empowering rural villages with reliable solar power monitoring, water pump management, and grid resilience tools.</p>
+      <div class="about-grid">
+        <div class="about-item"><span class="about-icon">🌞</span><h4 data-i18n="about.solar.title">Solar Monitoring</h4><p data-i18n="about.solar.desc">Real-time tracking of solar panel output and efficiency</p></div>
+        <div class="about-item"><span class="about-icon">💧</span><h4 data-i18n="about.water.title">Water Management</h4><p data-i18n="about.water.desc">Smart scheduling for solar-powered water pumping</p></div>
+        <div class="about-item"><span class="about-icon">⚡</span><h4 data-i18n="about.grid.title">Grid Integration</h4><p data-i18n="about.grid.desc">Seamless solar-grid hybrid for uninterrupted power</p></div>
+        <div class="about-item"><span class="about-icon">📊</span><h4 data-i18n="about.analytics.title">Analytics</h4><p data-i18n="about.analytics.desc">Data-driven insights for energy efficiency and savings</p></div>
+      </div>
+      <div class="team-section">
+        <h3>🛠️ Built Under</h3>
+        <div class="team-grid">
+          <div class="team-card"><div class="team-avatar">🇮🇳</div><div class="team-name">Digital India</div><div class="team-role">Ministry of Electronics &amp; IT</div></div>
+          <div class="team-card"><div class="team-avatar">☀️</div><div class="team-name">MNRE</div><div class="team-role">Ministry of New &amp; Renewable Energy</div></div>
+          <div class="team-card"><div class="team-avatar">💡</div><div class="team-name">PM-KUSUM</div><div class="team-role">Solar Pump Scheme</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-col">
+      <div class="footer-brand">
+        <div class="footer-brand-logo">
+          <svg width="20" height="20" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="9" fill="rgba(255,255,255,0.9)"/><path d="M18 3v4M18 29v4M3 18h4M29 18h4" stroke="rgba(255,255,255,0.7)" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </div>
+        Surya-Sanchay
+      </div>
+      <p data-i18n="footer.tagline">Smart Solar Management for rural India</p>
+      <div class="sdg-badges"><span class="sdg-badge">SDG 7</span><span class="sdg-badge">SDG 6</span><span class="sdg-badge">SDG 13</span></div>
+    </div>
+    <div class="footer-col">
+      <h4 data-i18n="footer.govt">Government Portals</h4>
+      <ul>
+        <li><a href="#" data-i18n="footer.mnre">Ministry of New &amp; Renewable Energy</a></li>
+        <li><a href="#" data-i18n="footer.digital">Digital India</a></li>
+        <li><a href="#" data-i18n="footer.mygov">MyGov India</a></li>
+        <li><a href="#" data-i18n="footer.kusum">PM-KUSUM Scheme</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4 data-i18n="footer.quick">Quick Links</h4>
+      <ul>
+        <li><a href="#" data-i18n="footer.manual">User Manual</a></li>
+        <li><a href="#" data-i18n="footer.videos">Training Videos</a></li>
+        <li><a href="#" data-i18n="footer.faq">FAQs</a></li>
+        <li><a href="#" data-i18n="footer.updates">System Updates</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4 data-i18n="footer.contact">Contact &amp; Support</h4>
+      <div class="contact-item">📞 1800-180-3333 (Toll Free)</div>
+      <div class="contact-item">📧 support@suryasanchay.gov.in</div>
+      <div class="contact-item">🕐 Mon–Sat: 8 AM – 8 PM</div>
+    </div>
+  </div>
+  <div class="footer-bottom"><p data-i18n="footer.copy">© 2026 Surya-Sanchay | Government of India Initiative | All Rights Reserved</p></div>
+</footer>
+
+<!-- NOTIFICATION PANEL -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-panel-header">
+    <h4 data-i18n="panel.notif">Notifications</h4>
+    <button class="close-btn" id="closeNotif">&times;</button>
+  </div>
+  <div class="notif-panel-list">
+    <div class="panel-notif-item green" data-i18n="panel.n1">Solar generation at peak — 8.2 kW output<span>2 min ago</span></div>
+    <div class="panel-notif-item yellow" data-i18n="panel.n2">Battery at 72% — moderate usage<span>15 min ago</span></div>
+    <div class="panel-notif-item teal" data-i18n="panel.n3">Water pumping complete — 4,500 L today<span>1 hr ago</span></div>
+    <div class="panel-notif-item red" data-i18n="panel.n4">Grid outage — solar switchover successful<span>2 hrs ago</span></div>
+  </div>
+</div>
+
+<!-- PUMP MODAL -->
+<div class="modal-overlay" id="pumpModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 data-i18n="modal.pump.title">Start Water Pump</h3>
+      <button class="close-btn" id="closePumpModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p data-i18n="modal.pump.desc">Start the solar water pump for the next scheduled cycle?</p>
+      <div class="modal-info-row"><span data-i18n="modal.pump.solar">Current Solar Output:</span><span class="yellow">7.8 kW</span></div>
+      <div class="modal-info-row"><span data-i18n="modal.pump.req">Pump Power Required:</span><span>2.1 kW</span></div>
+      <div class="modal-info-row"><span data-i18n="modal.pump.tank">Tank Level:</span><span class="teal">68%</span></div>
+    </div>
+    <div class="modal-footer">
+      <button class="action-btn secondary" id="cancelPump" data-i18n="modal.pump.cancel">Cancel</button>
+      <button class="action-btn primary" id="confirmPump" data-i18n="modal.pump.confirm">✓ Confirm Start</button>
+    </div>
+  </div>
+</div>
+
+<script src="translations.js"></script>
+<script src="pdf-report.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
