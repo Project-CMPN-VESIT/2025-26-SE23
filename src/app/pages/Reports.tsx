@@ -1,5 +1,5 @@
 import { Button } from '../components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import { Card, CardContent } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
 import { supabase } from '../../lib/supabaseClient'
 import { jsPDF } from 'jspdf'
@@ -7,11 +7,11 @@ import { useState } from 'react'
 import { useLanguage } from '../contexts/LanguageContext'
 import {
   FileText, Download, Sun, Droplets, Zap,
-  CheckCircle2, Loader2, TrendingUp, FileBarChart,
-  Info, AlertCircle
+  CheckCircle2, Loader2, FileBarChart, Info
 } from 'lucide-react'
 
 type ReportType = 'solar' | 'pumping' | 'grid' | 'combined'
+type Language = 'en' | 'hi' | 'mr'
 
 interface ReportItem {
   id: ReportType
@@ -24,6 +24,23 @@ interface ReportItem {
   table: string
 }
 
+// ── Locale helpers ──────────────────────────────────────────────────────────
+function getLocale(lang: Language): string {
+  return lang === 'hi' ? 'hi-IN' : lang === 'mr' ? 'mr-IN' : 'en-IN'
+}
+
+export function formatNumber(value: number, lang: Language, opts?: Intl.NumberFormatOptions): string {
+  return new Intl.NumberFormat(getLocale(lang), opts).format(value)
+}
+
+export function formatDate(date: Date, lang: Language): string {
+  return new Intl.DateTimeFormat(getLocale(lang), {
+    year: 'numeric', month: 'long', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  }).format(date)
+}
+
+// ── Static report definitions ────────────────────────────────────────────────
 const reportDefs = [
   {
     id: 'solar' as ReportType,
@@ -59,58 +76,218 @@ const reportDefs = [
   },
 ]
 
-/* 🔥 PDF GENERATION */
-async function generatePDF(report: ReportItem) {
-  const doc = new jsPDF()
-  const now = new Date().toLocaleString('en-IN')
+// ── Hex → RGB helper ─────────────────────────────────────────────────────────
+function hexToRgb(hex: string): [number, number, number] {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return [r, g, b]
+}
 
-  doc.setFontSize(18)
-  doc.text(`Surya-Sanchay — ${report.title}`, 14, 20)
-  doc.setFontSize(10)
-  doc.text(`Generated: ${now}`, 14, 28)
+// ── PDF generation ───────────────────────────────────────────────────────────
+async function generatePDF(report: ReportItem, lang: Language) {
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+  const pageW = doc.internal.pageSize.getWidth()
+  const pageH = doc.internal.pageSize.getHeight()
+  const margin = 14
+  const contentW = pageW - margin * 2
+  const now = new Date()
+  const locale = getLocale(lang)
+  const formattedDate = new Intl.DateTimeFormat(locale, {
+    year: 'numeric', month: 'long', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  }).format(now)
 
-  let y = 40
+  const [cr, cg, cb] = hexToRgb(report.color)
+  let pageNum = 1
 
-  const addSection = async (table: string, label: string) => {
-    try {
-      const { data, error } = await supabase.from(table).select('*')
-      if (error) throw error
-      if (!data || data.length === 0) return
+  // ── helpers ──────────────────────────────────────────────────────────────
+  const drawFooter = () => {
+    doc.setFontSize(8)
+    doc.setTextColor(150, 150, 150)
+    doc.setDrawColor(200, 200, 200)
+    doc.line(margin, pageH - 12, pageW - margin, pageH - 12)
+    doc.text('Gadheshwar Gram Panchayat · Surya-Sanchay', margin, pageH - 7)
+    doc.text(`Page ${pageNum}`, pageW - margin, pageH - 7, { align: 'right' })
+    doc.setTextColor(0, 0, 0)
+    pageNum++
+  }
 
-      doc.setFontSize(13)
-      doc.text(label, 14, y)
-      y += 8
-
-      doc.setFontSize(9)
-      data.forEach((row: any) => {
-        const line = Object.entries(row)
-          .map(([k, v]) => `${k}: ${v}`)
-          .join(' | ')
-        const wrapped = doc.splitTextToSize(line, 180)
-        doc.text(wrapped, 14, y)
-        y += wrapped.length * 5 + 3
-        if (y > 270) { doc.addPage(); y = 20 }
-      })
-      y += 6
-    } catch (err: any) {
-      console.error(`Error fetching ${table}:`, err.message)
+  const addPageIfNeeded = (y: number, neededSpace = 20): number => {
+    if (y + neededSpace > pageH - 20) {
+      drawFooter()
+      doc.addPage()
+      return 20
     }
+    return y
   }
 
-  if (report.id === 'combined') {
-    await addSection('solar_panel', 'Solar Panels')
-    await addSection('pumping_session', 'Pumping Sessions')
-    await addSection('grid_status', 'Grid Status')
-  } else {
-    await addSection(report.table, report.title)
+  // ── Cover block ──────────────────────────────────────────────────────────
+  // Gradient-style header bar (solid colour + lighter strip)
+  doc.setFillColor(cr, cg, cb)
+  doc.rect(0, 0, pageW, 42, 'F')
+  doc.setFillColor(Math.min(cr + 40, 255), Math.min(cg + 40, 255), Math.min(cb + 40, 255))
+  doc.rect(0, 36, pageW, 6, 'F')
+
+  // Project name
+  doc.setTextColor(255, 255, 255)
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'bold')
+  doc.text('SURYA-SANCHAY', margin, 13)
+
+  // Report title
+  doc.setFontSize(20)
+  doc.text(report.title.toUpperCase(), margin, 30)
+
+  // Reset text colour
+  doc.setTextColor(0, 0, 0)
+  doc.setFont('helvetica', 'normal')
+
+  // Generated on line
+  doc.setFontSize(9)
+  doc.setTextColor(80, 80, 80)
+  doc.text(`Generated: ${formattedDate}`, margin, 52)
+  doc.setTextColor(0, 0, 0)
+
+  // Thin colour accent line under date
+  doc.setDrawColor(cr, cg, cb)
+  doc.setLineWidth(0.5)
+  doc.line(margin, 55, pageW - margin, 55)
+
+  let y = 65
+
+  // ── Section renderer ─────────────────────────────────────────────────────
+  const addSection = async (table: string, label: string, sectionColor: [number, number, number]) => {
+    const { data, error } = await supabase.from(table).select('*')
+    if (error) {
+      console.error(`Error fetching ${table}:`, error.message)
+      return
+    }
+    if (!data || data.length === 0) return
+
+    const rows = data as Record<string, unknown>[]
+    const columns = Object.keys(rows[0])
+
+    // ── Section header bar ────────────────────────────────────────────────
+    y = addPageIfNeeded(y, 30)
+    doc.setFillColor(...sectionColor)
+    doc.roundedRect(margin, y, contentW, 9, 2, 2, 'F')
+    doc.setTextColor(255, 255, 255)
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(11)
+    doc.text(label, margin + 3, y + 6.2)
+    doc.setTextColor(0, 0, 0)
+    doc.setFont('helvetica', 'normal')
+    y += 13
+
+    // ── Column widths ──────────────────────────────────────────────────────
+    const colCount = columns.length
+    const maxCols = Math.min(colCount, 6)      // cap columns shown
+    const shownCols = columns.slice(0, maxCols)
+    const colW = contentW / maxCols
+
+    // ── Table header row ───────────────────────────────────────────────────
+    y = addPageIfNeeded(y, 12)
+    doc.setFillColor(240, 240, 240)
+    doc.rect(margin, y, contentW, 7, 'F')
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(8)
+    shownCols.forEach((col, i) => {
+      const label = col.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+      doc.text(label, margin + i * colW + 2, y + 5, { maxWidth: colW - 3 })
+    })
+    doc.setFont('helvetica', 'normal')
+
+    // ── Table border lines ─────────────────────────────────────────────────
+    doc.setDrawColor(200, 200, 200)
+    doc.setLineWidth(0.1)
+    // outer border of header
+    doc.rect(margin, y, contentW, 7)
+
+    y += 7
+
+    // ── Data rows ──────────────────────────────────────────────────────────
+    const maxRows = Math.min(rows.length, 50)
+    for (let ri = 0; ri < maxRows; ri++) {
+      y = addPageIfNeeded(y, 8)
+      const rowH = 6.5
+      if (ri % 2 === 0) {
+        doc.setFillColor(250, 250, 252)
+        doc.rect(margin, y, contentW, rowH, 'F')
+      }
+      doc.setFontSize(7.5)
+      doc.setTextColor(30, 30, 30)
+      shownCols.forEach((col, ci) => {
+        const raw = rows[ri][col]
+        let val = raw === null || raw === undefined ? '—' : String(raw)
+        // Locale-format numbers
+        const num = Number(raw)
+        if (!isNaN(num) && val !== '' && val !== '—') {
+          val = new Intl.NumberFormat(locale).format(num)
+        }
+        doc.text(val, margin + ci * colW + 2, y + 4.5, { maxWidth: colW - 3 })
+      })
+      // row separator
+      doc.setDrawColor(220, 220, 220)
+      doc.line(margin, y + rowH, margin + contentW, y + rowH)
+      y += rowH
+    }
+
+    // Outer border of whole table body
+    doc.setDrawColor(180, 180, 180)
+    doc.setLineWidth(0.2)
+    doc.rect(margin, y - maxRows * 6.5, contentW, maxRows * 6.5)
+
+    // ── Summary stats ──────────────────────────────────────────────────────
+    y += 4
+    y = addPageIfNeeded(y, 16)
+
+    // count numeric columns for summary
+    const numericCols = shownCols.filter(col => {
+      const sample = rows.find(r => r[col] !== null && r[col] !== undefined)
+      return sample && !isNaN(Number(sample[col]))
+    })
+
+    const summaryParts: string[] = [`Total rows: ${new Intl.NumberFormat(locale).format(rows.length)}`]
+    numericCols.slice(0, 3).forEach(col => {
+      const vals = rows.map(r => Number(r[col])).filter(v => !isNaN(v))
+      if (vals.length) {
+        const avg = vals.reduce((a, b) => a + b, 0) / vals.length
+        const colLabel = col.replace(/_/g, ' ')
+        summaryParts.push(`Avg ${colLabel}: ${new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(avg)}`)
+      }
+    })
+
+    const [sr, sg, sb] = sectionColor
+    doc.setFillColor(Math.min(sr + 60, 255), Math.min(sg + 60, 255), Math.min(sb + 60, 255))
+    doc.roundedRect(margin, y, contentW, 9, 2, 2, 'F')
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(8)
+    doc.setTextColor(40, 40, 40)
+    doc.text(summaryParts.join('   ·   '), margin + 3, y + 6)
+    doc.setFont('helvetica', 'normal')
+    doc.setTextColor(0, 0, 0)
+    y += 16
   }
+
+  // ── Dispatch per report type ──────────────────────────────────────────────
+  if (report.id === 'combined') {
+    await addSection('solar_panel', 'Solar Panels', hexToRgb('#E6A817'))
+    await addSection('pumping_session', 'Pumping Sessions', hexToRgb('#0ea5e9'))
+    await addSection('grid_status', 'Grid Status', hexToRgb('#6366f1'))
+  } else {
+    await addSection(report.table, report.title, [cr, cg, cb])
+  }
+
+  // Final footer
+  drawFooter()
 
   doc.save(`surya-sanchay-${report.id}-report.pdf`)
 }
 
-/* ─── COMPONENT ─── */
+// ── Component ────────────────────────────────────────────────────────────────
 export function Reports() {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
 
   const [generating, setGenerating] = useState<ReportType | null>(null)
   const [done, setDone] = useState<ReportType[]>([])
@@ -124,7 +301,7 @@ export function Reports() {
   const handleGenerate = async (report: ReportItem) => {
     setGenerating(report.id)
     try {
-      await generatePDF(report)
+      await generatePDF(report, language as Parameters<typeof generatePDF>[1])
       setDone((prev) => [...prev, report.id])
       setTimeout(() => {
         setDone((prev) => prev.filter((d) => d !== report.id))
@@ -204,7 +381,7 @@ export function Reports() {
                   ) : (
                     <>
                       <Badge variant="outline" className="text-xs">PDF</Badge>
-                      <Badge variant="outline" className="text-xs">Live Data</Badge>
+                      <Badge variant="outline" className="text-xs">{t('common.live')}</Badge>
                       <Badge variant="outline" className="text-xs capitalize">{report.id}</Badge>
                     </>
                   )}
