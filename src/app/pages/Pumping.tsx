@@ -70,7 +70,9 @@ export function Pumping() {
         .select('*')
         .order('start_time', { ascending: false })
       if (error) throw error
+      console.log('✅ Pumping — pumping_session:', data)
       setSessions(data || [])
+
     } catch (err: any) {
       console.error('Fetch error:', err.message)
       setSessions([])

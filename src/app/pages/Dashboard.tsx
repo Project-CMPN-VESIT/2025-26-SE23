@@ -47,9 +47,13 @@ export function Dashboard() {
       if (s.error) throw s.error;
       if (p.error) throw p.error;
       if (g.error) throw g.error;
+      console.log('✅ Dashboard — solar_panel:', s.data)
+      console.log('✅ Dashboard — pumping_session:', p.data)
+      console.log('✅ Dashboard — grid_status:', g.data)
       setSolar(s.data || []);
       setPumping(p.data || []);
       setGrid(g.data || []);
+
     } catch (err: any) {
       console.error('Dashboard fetch error:', err.message);
       setSolar([]); setPumping([]); setGrid([]);

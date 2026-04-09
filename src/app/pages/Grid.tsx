@@ -38,7 +38,9 @@ export function Grid() {
         .select('*')
         .order('timestamp', { ascending: false })
       if (error) throw error
+      console.log('✅ Grid — grid_status:', data)
       setGridData(data || [])
+
     } catch (err: any) {
       console.error('Grid fetch error:', err.message)
       setGridData([])

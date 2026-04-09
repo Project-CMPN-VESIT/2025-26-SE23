@@ -69,7 +69,9 @@ export function Solar() {
           .from('solar_panel')
           .select('*')
         if (error) throw error
+        console.log('✅ Solar panel data from Supabase:', data)
         setSolarData(data || [])
+
       } catch (err: any) {
         console.error('Supabase error:', err.message)
         setSolarData([])
