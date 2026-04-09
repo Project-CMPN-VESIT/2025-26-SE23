@@ -16,6 +16,7 @@ import { LanguageSwitcher } from './LanguageSwitcher';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
 import { useState, useRef, useEffect } from 'react';
+import { supabase } from '../../lib/supabaseClient';
 import logo from '../../assets/Logo.png';
 import '../styles/language-switcher.css';
 
@@ -104,40 +105,43 @@ export function Header() {
   const notificationsButtonRef = useRef<HTMLButtonElement>(null);
 
   // ── Notifications state ──────────────────────────────────────────────────
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: 1,
-      title: 'Grid outage detected',
-      description: 'Power failure in Gadheshwar village. Solar system compensating.',
-      timestamp: '5 min ago',
-      type: 'critical',
-      unread: true,
-    },
-    {
-      id: 2,
-      title: 'Battery low warning',
-      description: 'Battery level at 25%. Consider reducing non-essential loads.',
-      timestamp: '20 min ago',
-      type: 'warning',
-      unread: true,
-    },
-    {
-      id: 3,
-      title: 'Solar efficiency update',
-      description: 'Panel efficiency at 92% today. Good performance maintained.',
-      timestamp: '4 hours ago',
-      type: 'info',
-      unread: false,
-    },
-    {
-      id: 4,
-      title: 'Water pump scheduled',
-      description: 'Pumping session completed successfully at 2:00 PM.',
-      timestamp: '8 hours ago',
-      type: 'info',
-      unread: false,
-    },
-  ]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  // Fetch real notifications from Supabase on mount
+  useEffect(() => {
+    async function loadNotifications() {
+      const { data, error } = await supabase
+        .from('notification')
+        .select('notification_id, notification_type, title, message, is_read, sent_at')
+        .order('sent_at', { ascending: false })
+        .limit(10);
+
+      if (error) {
+        // Table may not exist yet — silently show empty bell, not fake data
+        console.warn('Could not load notifications:', error.message);
+        return;
+      }
+
+      const mapped: Notification[] = (data ?? []).map((row: any) => ({
+        id: row.notification_id,
+        title: row.title ?? 'Notification',
+        description: row.message ?? '',
+        timestamp: row.sent_at
+          ? new Date(row.sent_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+          : '',
+        type: (row.notification_type === 'critical'
+          ? 'critical'
+          : row.notification_type === 'warning'
+          ? 'warning'
+          : 'info') as Notification['type'],
+        unread: !row.is_read,
+      }));
+
+      setNotifications(mapped);
+    }
+    loadNotifications();
+  }, []);
+
 
   const handleMarkAllAsRead = () =>
     setNotifications((prev: Notification[]) => prev.map((n: Notification) => ({ ...n, unread: false })));

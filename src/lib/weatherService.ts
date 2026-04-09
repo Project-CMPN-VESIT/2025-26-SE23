@@ -66,6 +66,15 @@ export async function fetchSolarWeatherData(
   if (!res.ok) throw new Error('Failed to fetch weather data');
   const data = await res.json();
 
+  // Validate API response shape before destructuring
+  if (
+    !data?.hourly?.direct_radiation ||
+    !data?.hourly?.cloudcover ||
+    !data?.hourly?.temperature_2m
+  ) {
+    throw new Error('Unexpected API response shape from Open-Meteo');
+  }
+
   // Open-Meteo returns 24 values for today when forecast_days=1
   const radiations: number[] = data.hourly.direct_radiation.slice(0, 24);
   const cloudcovers: number[] = data.hourly.cloudcover.slice(0, 24);
@@ -91,3 +100,29 @@ export async function fetchSolarWeatherData(
 
   return { hourlyData, weatherInfo };
 }
+
+/**
+ * Generate realistic synthetic solar generation data for a typical sunny day.
+ * Used as fallback when geolocation is denied or weather API is unavailable.
+ * Uses deterministic cloud-cover values (no Math.random) to prevent chart jumping on refresh.
+ */
+export function generateFallbackHourlyData(): HourlyWeatherData[] {
+  // Typical solar bell-curve peaking around 12–13h
+  const profile = [
+    0, 0, 0, 0, 0, 2, 8, 20, 38, 55, 70, 85,
+    92, 88, 78, 62, 44, 28, 14, 5, 1, 0, 0, 0,
+  ];
+  // Deterministic cloud-cover pattern — avoids chart flickering on refresh
+  const cloudPattern = [
+    0, 0, 0, 0, 0, 5, 8, 10, 12, 14, 12, 10,
+    8, 9, 11, 13, 15, 12, 8, 5, 2, 0, 0, 0,
+  ];
+  return profile.map((gen, i) => ({
+    hour: i,
+    label: `${i}:00`,
+    generation: gen,
+    radiation: Math.round((gen / 100) * 900),
+    cloudcover: gen > 0 ? cloudPattern[i] : 0,
+  }));
+}
+

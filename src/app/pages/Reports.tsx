@@ -291,6 +291,7 @@ export function Reports() {
 
   const [generating, setGenerating] = useState<ReportType | null>(null)
   const [done, setDone] = useState<ReportType[]>([])
+  const [errorReport, setErrorReport] = useState<ReportType | null>(null)
 
   const reports: ReportItem[] = reportDefs.map((r) => ({
     ...r,
@@ -300,6 +301,7 @@ export function Reports() {
 
   const handleGenerate = async (report: ReportItem) => {
     setGenerating(report.id)
+    setErrorReport(null)
     try {
       await generatePDF(report, language as Parameters<typeof generatePDF>[1])
       setDone((prev) => [...prev, report.id])
@@ -308,6 +310,7 @@ export function Reports() {
       }, 3000)
     } catch (err: any) {
       console.error('PDF generation error:', err.message)
+      setErrorReport(report.id)
     } finally {
       setGenerating(null)
     }
@@ -416,6 +419,11 @@ export function Reports() {
                     </>
                   )}
                 </Button>
+                {errorReport === report.id && (
+                  <p className="text-xs text-red-500 text-center mt-2">
+                    ⚠️ Failed to generate report. Check your internet connection.
+                  </p>
+                )}
               </CardContent>
             </Card>
           )

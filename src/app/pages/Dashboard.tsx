@@ -66,11 +66,16 @@ export function Dashboard() {
   const voltage = grid.length > 0 ? grid[0].voltage_volts : null;
   const freq = grid.length > 0 ? grid[0].frequency_hz : null;
 
+  // Average electricity tariff for rural Maharashtra (₹/kWh)
+  const ELECTRICITY_RATE_PER_KWH = 10;
+
   const stats = {
     outages: grid.filter((g) => g.is_online === false).length,
     panels: solar.filter((s) => s.is_active).length,
     waterPumped: pumping.reduce((sum, s) => sum + (s.water_pumped_litres || 0), 0),
-    energySaved: (pumping.reduce((sum, s) => sum + (s.energy_consumed_kwh || 0), 0) * 10).toFixed(0),
+    energySaved: (
+      pumping.reduce((sum, s) => sum + (s.energy_consumed_kwh || 0), 0) * ELECTRICITY_RATE_PER_KWH
+    ).toFixed(0),
   };
 
   /* 📄 PDF */

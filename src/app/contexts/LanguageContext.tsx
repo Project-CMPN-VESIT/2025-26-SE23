@@ -175,6 +175,9 @@ const translations: Record<Language, Record<string, string>> = {
     'solar.monthlyPerformance': 'Monthly Performance',
     'solar.avgDaily': 'Average Daily',
     'solar.bestDay': 'Best Day',
+    'solar.activePanels': 'Active Panels',
+    'solar.temperature': 'Temperature',
+    'solar.cloudCover': 'Cloud Cover',
     
     // Pumping
     'pumping.subtitle': 'Optimize water pumping during solar peaks',
@@ -510,6 +513,9 @@ const translations: Record<Language, Record<string, string>> = {
     'solar.monthlyPerformance': 'मासिक प्रदर्शन',
     'solar.avgDaily': 'औसत दैनिक',
     'solar.bestDay': 'सबसे अच्छा दिन',
+    'solar.activePanels': 'सक्रिय पैनल',
+    'solar.temperature': 'तापमान',
+    'solar.cloudCover': 'बादल आवरण',
     
     // Pumping
     'pumping.subtitle': 'सौर चरम के दौरान जल पंपिंग का अनुकूलन करें',
@@ -845,6 +851,9 @@ const translations: Record<Language, Record<string, string>> = {
     'solar.monthlyPerformance': 'मासिक कामगिरी',
     'solar.avgDaily': 'दैनंदिन सरासरी',
     'solar.bestDay': 'सर्वोत्तम दिवस',
+    'solar.activePanels': 'सक्रिय पॅनेल',
+    'solar.temperature': 'तापमान',
+    'solar.cloudCover': 'ढग आवरण',
     
     // Pumping
     'pumping.subtitle': 'सौर शिखरा दरम्यान पाणी पंपिंग ऑप्टिमाइझ करा',
@@ -1041,7 +1050,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   };
 
   const t = (key: string): string => {
-    return translations[language][key] || key;
+    return translations[language][key] ?? translations['en'][key] ?? key;
   };
 
   return (

@@ -191,7 +191,15 @@ export function Grid() {
       </div>
 
       {/* ── VOLTAGE TREND CHART ── */}
+      {voltageChart.length === 1 && (
+        <Card>
+          <CardContent className="py-6 text-center text-sm text-muted-foreground">
+            Only 1 grid record found. Add more records to display the voltage trend chart.
+          </CardContent>
+        </Card>
+      )}
       {voltageChart.length > 1 && (
+
         <Card>
           <CardHeader>
             <CardTitle className="text-base">{t('grid.voltageTrend')}</CardTitle>

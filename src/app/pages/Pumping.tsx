@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useLanguage } from '../contexts/LanguageContext'
 import { supabase } from '../../lib/supabaseClient'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
@@ -58,6 +58,8 @@ export function Pumping() {
   const [overrideMsg, setOverrideMsg] = useState('')
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  // Ref tracks the real startedAt time to avoid stale closures in handleStop
+  const startedAtRef = useRef<Date | null>(null)
 
   /* ── FETCH DATA ── */
   const fetchData = async () => {
@@ -90,29 +92,26 @@ export function Pumping() {
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
   }, [pumpRunning])
 
-  /* AUTO STOP */
-  useEffect(() => {
-    if (pumpRunning && targetDuration && elapsed >= Number(targetDuration) * 60) {
-      handleStop(true)
-    }
-  }, [elapsed])
 
   /* START */
   const handleStart = () => {
+    const now = new Date()
     setElapsed(0)
-    setStartedAt(new Date())
+    setStartedAt(now)
+    startedAtRef.current = now
     setPumpRunning(true)
     setOverrideStatus('idle')
     setOverrideMsg('')
   }
 
   /* ── STOP + SAVE ── */
-  const handleStop = async (autoStopped = false) => {
+  const handleStop = useCallback(async (autoStopped = false) => {
     setPumpRunning(false)
     if (timerRef.current) clearInterval(timerRef.current)
 
     const endTime = new Date()
-    const startTime = startedAt ?? endTime
+    // Use the ref so we always get the real start time, not a stale closure value
+    const startTime = startedAtRef.current ?? endTime
     const durationH = elapsed / 3600
     const PUMP_KW = 1.5
     const FLOW_LPM = 100
@@ -146,7 +145,14 @@ export function Pumping() {
       setOverrideStatus('error')
       setOverrideMsg('Could not save session: ' + err.message)
     }
-  }
+  }, [elapsed, targetWater, targetDuration])
+
+  /* AUTO STOP — placed after handleStop so the reference is always defined */
+  useEffect(() => {
+    if (pumpRunning && targetDuration && elapsed >= Number(targetDuration) * 60) {
+      handleStop(true)
+    }
+  }, [elapsed, pumpRunning, targetDuration, handleStop])
 
   /* ── SUMMARY ── */
   const totalWater = sessions.reduce((s, r) => s + (r.water_pumped_litres || 0), 0)

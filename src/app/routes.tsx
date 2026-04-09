@@ -6,6 +6,7 @@ import { Pumping } from './pages/Pumping';
 import { Grid } from './pages/Grid';
 import { Reports } from './pages/Reports';
 import { About } from './pages/About';
+import { NotFound } from './pages/NotFound';
 
 export const router = createBrowserRouter([
   {
@@ -36,6 +37,11 @@ export const router = createBrowserRouter([
         path: 'about',
         Component: About,
       },
+      {
+        path: '*',
+        Component: NotFound,
+      },
     ],
   },
 ]);
+

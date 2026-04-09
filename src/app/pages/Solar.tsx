@@ -33,6 +33,7 @@ import {
   getCurrentLocation,
   fetchSolarWeatherData,
   getCityName,
+  generateFallbackHourlyData,
   type HourlyWeatherData,
 } from '../../lib/weatherService'
 
@@ -46,9 +47,17 @@ export function Solar() {
   const [dbLoading, setDbLoading] = useState(true)
 
   // 🌤 WEATHER STATES
+  type LocationState = 'idle' | 'requesting' | 'granted' | 'denied' | 'error'
+
+  interface WeatherDisplay {
+    city: string
+    temperature: number
+    cloudcover: number
+  }
+
   const [locationState, setLocationState] = useState<LocationState>('idle')
   const [hourlyData, setHourlyData] = useState<HourlyWeatherData[]>([])
-  const [weatherInfo, setWeatherInfo] = useState<any>(null)
+  const [weatherInfo, setWeatherInfo] = useState<WeatherDisplay | null>(null)
   const [weatherLoading, setWeatherLoading] = useState(false)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
@@ -95,7 +104,10 @@ export function Solar() {
       setLastUpdated(new Date())
     } catch (err: any) {
       console.error('Weather error:', err)
-      setLocationState(err?.code === 1 ? 'denied' : 'error')
+      const state = err?.code === 1 ? 'denied' : 'error'
+      setLocationState(state)
+      // Use fallback data so the chart is never empty
+      setHourlyData(generateFallbackHourlyData())
     } finally {
       setWeatherLoading(false)
     }
@@ -137,7 +149,7 @@ export function Solar() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           {
-            label: 'Active Panels',
+            label: t('solar.activePanels'),
             value: dbLoading ? '—' : activePanels,
             sub: `of ${solarData.length} total`,
             color: '#E6A817',
@@ -151,14 +163,14 @@ export function Solar() {
             icon: Zap,
           },
           {
-            label: 'Temperature',
+            label: t('solar.temperature'),
             value: weatherInfo ? `${weatherInfo.temperature}°C` : '—',
             sub: weatherInfo?.city || (locationState === 'requesting' ? 'Locating…' : 'Not available'),
             color: '#C56A3D',
             icon: Thermometer,
           },
           {
-            label: 'Cloud Cover',
+            label: t('solar.cloudCover'),
             value: weatherInfo ? `${weatherInfo.cloudcover}%` : '—',
             sub: weatherInfo ? (weatherInfo.cloudcover < 30 ? t('solar.excellent') : weatherInfo.cloudcover < 60 ? t('solar.good') : t('solar.fair')) : '—',
             color: '#4CAF50',
@@ -235,7 +247,12 @@ export function Solar() {
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
               <CardTitle className="text-base">{t('solar.24hProfile')}</CardTitle>
-              <p className="text-xs text-muted-foreground mt-0.5">{t('solar.goldenHoursDesc')}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {t('solar.goldenHoursDesc')}
+                {(locationState === 'denied' || locationState === 'error') && (
+                  <span className="ml-2 text-amber-500">(Estimated — location unavailable)</span>
+                )}
+              </p>
             </div>
             {/* Legend */}
             <div className="flex flex-wrap items-center gap-3 text-xs">
